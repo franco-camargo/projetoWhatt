@@ -1,0 +1,99 @@
+/* --- RESET E ESTILO GERAL --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #d1d7db;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* --- CAIXA PRINCIPAL DO CHAT --- */
+#chat-container {
+  width: 100%;
+  max-width: 420px;
+  height: 90vh;
+  background-color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+/* --- CABEÇALHO --- */
+h2 {
+  background-color: #075e54;
+  color: #ffffff;
+  padding: 16px;
+  font-size: 1.1rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* --- ÁREA DAS MENSAGENS --- */
+#mensagens {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background-color: #efeae2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* --- BALÃO DE MENSAGEM --- */
+.msg {
+  background-color: #ffffff;
+  color: #111b21;
+  padding: 10px 14px;
+  border-radius: 8px 8px 8px 0px;
+  max-width: 80%;
+  word-wrap: break-word;
+  font-size: 0.95rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  align-self: flex-start;
+}
+
+/* --- CAMPO DE DIGITAÇÃO E BOTAO --- */
+#form-mensagem {
+  display: flex;
+  padding: 10px;
+  background-color: #f0f2f5;
+  gap: 8px;
+}
+
+input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #cccccc;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+input:focus {
+  border-color: #075e54;
+}
+
+button {
+  padding: 0 20px;
+  background-color: #075e54;
+  color: #ffffff;
+  border: none;
+  border-radius: 24px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #128c7e;
+}
