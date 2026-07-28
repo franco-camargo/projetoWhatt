@@ -1,4 +1,4 @@
-// 1. CONFIGURAÇÃO DO FIREBASE
+// 1. CONFIGURAÇÃO FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyBfZ_h3rVT_XyUWVErESOUaBU52M_S-JLI",
   authDomain: "projetofirabasechat.firebaseapp.com",
@@ -13,26 +13,24 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-// Servidores STUN públicos para negociação WebRTC
+// Servidores STUN para WebRTC
 const rtcConfig = {
-  iceServers: [
-    { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }
-  ],
+  iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }],
   iceCandidatePoolSize: 10,
 };
 
-// Variáveis Globais
 const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 let currentAvatarUrl = DEFAULT_AVATAR;
 let selectedFile = null;
 let unsubscribeMensagens = null;
+let targetEmail = "";
 
-// Variáveis da Chamada WebRTC
+// WebRTC Globais
 let peerConnection = null;
 let localStream = null;
 let remoteStream = null;
 
-// 2. ELEMENTOS DA DOM
+// ELEMENTOS DOM
 const authContainer = document.getElementById('auth-container');
 const chatContainer = document.getElementById('chat-container');
 const authEmail = document.getElementById('auth-email');
@@ -46,6 +44,9 @@ const userDisplay = document.getElementById('user-display');
 const userAvatarImg = document.getElementById('user-avatar-img');
 const avatarInput = document.getElementById('avatar-input');
 
+const targetEmailInput = document.getElementById('target-email');
+const setTargetBtn = document.getElementById('set-target-btn');
+
 const campoTexto = document.getElementById('message');
 const btnEnviar = document.getElementById('send-btn');
 const caixaMensagens = document.getElementById('chat-box');
@@ -57,7 +58,7 @@ const filePreviewArea = document.getElementById('file-preview-area');
 const fileNameDisplay = document.getElementById('file-name-display');
 const cancelFileBtn = document.getElementById('cancel-file-btn');
 
-// Elementos de Vídeo Chamada
+// Elementos Vídeo
 const videoCallBtn = document.getElementById('video-call-btn');
 const videoModal = document.getElementById('video-modal');
 const localVideo = document.getElementById('local-video');
@@ -69,14 +70,13 @@ const toggleMicBtn = document.getElementById('toggle-mic-btn');
 const toggleCamBtn = document.getElementById('toggle-cam-btn');
 const endCallBtn = document.getElementById('end-call-btn');
 
-// 3. MONITORAMENTO DE AUTENTICAÇÃO
+// MONITOR DE AUTENTICAÇÃO
 auth.onAuthStateChanged((user) => {
   if (user) {
     authContainer.style.display = 'none';
     chatContainer.style.display = 'block';
     userDisplay.textContent = user.email;
     carregarPerfilUsuario(user.uid);
-    carregarMensagensDoUsuario(user.uid);
   } else {
     authContainer.style.display = 'block';
     chatContainer.style.display = 'none';
@@ -84,7 +84,7 @@ auth.onAuthStateChanged((user) => {
   }
 });
 
-// 4. AUTENTICAÇÃO E PERFIL
+// LOGIN / CADASTRO
 btnLogin.addEventListener('click', () => {
   const email = authEmail.value.trim();
   const senha = authPassword.value.trim();
@@ -99,19 +99,31 @@ btnRegister.addEventListener('click', () => {
   if (!email || !senha) return (authError.textContent = "Preencha e-mail e senha.");
 
   auth.createUserWithEmailAndPassword(email, senha)
-    .then(() => alert("Conta criada!"))
+    .then(() => alert("Conta criada com sucesso!"))
     .catch(err => authError.textContent = err.message);
 });
 
 btnLogout.addEventListener('click', () => auth.signOut());
 
+// DEFINE O USUÁRIO COM QUEM VAI CONVERSAR
+setTargetBtn.addEventListener('click', () => {
+  const email = targetEmailInput.value.trim();
+  if (!email) return alert("Digite o e-mail do contato!");
+  if (email === auth.currentUser.email) return alert("Digite o e-mail de outro usuário!");
+
+  targetEmail = email;
+  alert(`Chat aberto com: ${targetEmail}`);
+  carregarMensagens();
+});
+
+// ALTERAÇÃO DE AVATAR
 avatarInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
   const user = auth.currentUser;
   if (!file || !user) return;
 
   const ref = storage.ref(`avatars/${user.uid}`);
-  ref.put(file).then(snapshot => snapshot.ref.getDownloadURL()).then(url => {
+  ref.put(file).then(snap => snap.ref.getDownloadURL()).then(url => {
     currentAvatarUrl = url;
     userAvatarImg.src = url;
     db.collection("usuarios").doc(user.uid).set({ avatarUrl: url }, { merge: true });
@@ -127,7 +139,7 @@ function carregarPerfilUsuario(userId) {
   });
 }
 
-// 5. EMOJIS, ANEXOS E MENSAGENS
+// EMOJIS E ANEXOS
 emojiBtn.addEventListener('click', () => {
   emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'grid' : 'none';
 });
@@ -153,11 +165,16 @@ cancelFileBtn.addEventListener('click', () => {
   filePreviewArea.style.display = 'none';
 });
 
+// ENVIAR MENSAGEM
 async function enviarMensagem() {
   const user = auth.currentUser;
   const texto = campoTexto.value.trim();
 
-  if (!user || (!texto && !selectedFile)) return;
+  if (!user) return alert("Você precisa estar logado!");
+  if (!targetEmail) return alert("Defina o e-mail do contato antes de enviar!");
+  if (!texto && !selectedFile) return;
+
+  btnEnviar.disabled = true;
 
   let fileUrl = null, fileName = null, fileType = null;
 
@@ -169,8 +186,10 @@ async function enviarMensagem() {
     fileUrl = await snap.ref.getDownloadURL();
   }
 
+  // Grava a mensagem vinculando remetente e destinatário
   db.collection("mensagens").add({
-    userId: user.uid,
+    remetenteEmail: user.email,
+    destinatarioEmail: targetEmail,
     autor: user.email,
     avatarUrl: currentAvatarUrl,
     texto: texto,
@@ -178,31 +197,49 @@ async function enviarMensagem() {
     anexoNome: fileName,
     anexoTipo: fileType,
     criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    campoTexto.value = '';
+    selectedFile = null;
+    filePreviewArea.style.display = 'none';
+    btnEnviar.disabled = false;
+  }).catch((err) => {
+    alert("Erro ao enviar: " + err.message);
+    btnEnviar.disabled = false;
   });
-
-  campoTexto.value = '';
-  selectedFile = null;
-  filePreviewArea.style.display = 'none';
 }
 
 btnEnviar.addEventListener('click', enviarMensagem);
 campoTexto.addEventListener('keypress', (e) => { if (e.key === 'Enter') enviarMensagem(); });
 
-function carregarMensagensDoUsuario(userId) {
+// CARREGAR MENSAGENS DA CONVERSA ESPECÍFICA
+function carregarMensagens() {
   if (unsubscribeMensagens) unsubscribeMensagens();
+  const myEmail = auth.currentUser.email;
 
   unsubscribeMensagens = db.collection("mensagens")
-    .where("userId", "==", userId)
     .onSnapshot((snapshot) => {
       caixaMensagens.innerHTML = '';
       let mensagens = [];
-      snapshot.forEach(doc => mensagens.push(doc.data()));
 
+      snapshot.forEach(doc => {
+        const m = doc.data();
+        // Filtra mensagens pertencentes ao par (Eu <-> Contato)
+        if (
+          (m.remetenteEmail === myEmail && m.destinatarioEmail === targetEmail) ||
+          (m.remetenteEmail === targetEmail && m.destinatarioEmail === myEmail)
+        ) {
+          mensagens.push(m);
+        }
+      });
+
+      // Ordena por data no cliente
       mensagens.sort((a, b) => (a.criadoEm ? a.criadoEm.toMillis() : Date.now()) - (b.criadoEm ? b.criadoEm.toMillis() : Date.now()));
 
       mensagens.forEach(msg => {
         const div = document.createElement('div');
         div.classList.add('msg');
+        if (msg.remetenteEmail === myEmail) div.classList.add('msg-mine');
+
         let anexo = '';
         if (msg.anexoUrl) {
           anexo = msg.anexoTipo === 'image' 
@@ -224,33 +261,29 @@ function carregarMensagensDoUsuario(userId) {
     });
 }
 
-// 6. SISTEMA DE VÍDEO CHAMADA WEBRTC VIA FIRESTORE
-
-// Abrir Modal e Ativar Câmera Local
+// 4. VÍDEO CHAMADA WEBRTC
 videoCallBtn.addEventListener('click', async () => {
   videoModal.style.display = 'flex';
   await iniciarMediaLocal();
 });
 
 async function iniciarMediaLocal() {
-  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-  remoteStream = new MediaStream();
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    remoteStream = new MediaStream();
 
-  localVideo.srcObject = localStream;
-  remoteVideo.srcObject = remoteStream;
+    localVideo.srcObject = localStream;
+    remoteVideo.srcObject = remoteStream;
+  } catch (err) {
+    alert("Erro ao acessar câmera/mic: " + err.message);
+  }
 }
 
-// CRIAR UMA CHAMADA (Pessoa A)
 createCallBtn.addEventListener('click', async () => {
   peerConnection = new RTCPeerConnection(rtcConfig);
 
-  // Adiciona a mídia local à conexão
   localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
-  // Ouve faixas do parceiro remoto
-  peerConnection.ontrack = (event) => {
-    event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
-  };
+  peerConnection.ontrack = event => event.streams[0].getTracks().forEach(t => remoteStream.addTrack(t));
 
   const callDoc = db.collection('chamadas').doc();
   const offerCandidates = callDoc.collection('offerCandidates');
@@ -258,48 +291,43 @@ createCallBtn.addEventListener('click', async () => {
 
   callIdInput.value = callDoc.id;
 
-  // Salva ICE Candidates locais
-  peerConnection.onicecandidate = (event) => {
-    if (event.candidate) {
-      offerCandidates.add(event.candidate.toJSON());
-    }
+  peerConnection.onicecandidate = event => {
+    if (event.candidate) offerCandidates.add(event.candidate.toJSON());
   };
 
-  // Cria a Oferta SDP
   const offerDescription = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offerDescription);
 
-  const offer = {
-    sdp: offerDescription.sdp,
-    type: offerDescription.type,
-  };
+  await callDoc.set({ offer: { sdp: offerDescription.sdp, type: offerDescription.type } });
 
-  await callDoc.set({ offer });
+  // Envia código na conversa se houver contato configurado
+  if (targetEmail) {
+    db.collection("mensagens").add({
+      remetenteEmail: auth.currentUser.email,
+      destinatarioEmail: targetEmail,
+      autor: auth.currentUser.email,
+      avatarUrl: currentAvatarUrl,
+      texto: `📹 Chamada iniciada! Código de acesso: ${callDoc.id}`,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
 
-  // Notifica o usuário para enviar o ID
-  enviarCodigoNoChat(callDoc.id);
-
-  // Ouve a Resposta da chamada
-  callDoc.onSnapshot((snapshot) => {
+  callDoc.onSnapshot(snapshot => {
     const data = snapshot.data();
     if (!peerConnection.currentRemoteDescription && data?.answer) {
-      const answerDescription = new RTCSessionDescription(data.answer);
-      peerConnection.setRemoteDescription(answerDescription);
+      peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
     }
   });
 
-  // Ouve ICE Candidates do outro parceiro
-  answerCandidates.onSnapshot((snapshot) => {
-    snapshot.docChanges().forEach((change) => {
+  answerCandidates.onSnapshot(snapshot => {
+    snapshot.docChanges().forEach(change => {
       if (change.type === 'added') {
-        const candidate = new RTCIceCandidate(change.doc.data());
-        peerConnection.addIceCandidate(candidate);
+        peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
       }
     });
   });
 });
 
-// ENTRAR EM UMA CHAMADA EXISTENTE (Pessoa B)
 joinCallBtn.addEventListener('click', async () => {
   const callId = callIdInput.value.trim();
   if (!callId) return alert("Digite o código da chamada!");
@@ -311,84 +339,46 @@ joinCallBtn.addEventListener('click', async () => {
   peerConnection = new RTCPeerConnection(rtcConfig);
 
   localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+  peerConnection.ontrack = event => event.streams[0].getTracks().forEach(t => remoteStream.addTrack(t));
 
-  peerConnection.ontrack = (event) => {
-    event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
-  };
-
-  peerConnection.onicecandidate = (event) => {
-    if (event.candidate) {
-      answerCandidates.add(event.candidate.toJSON());
-    }
+  peerConnection.onicecandidate = event => {
+    if (event.candidate) answerCandidates.add(event.candidate.toJSON());
   };
 
   const callData = (await callDoc.get()).data();
   if (!callData) return alert("Chamada não encontrada!");
 
-  const offerDescription = callData.offer;
-  await peerConnection.setRemoteDescription(new RTCSessionDescription(offerDescription));
-
+  await peerConnection.setRemoteDescription(new RTCSessionDescription(callData.offer));
   const answerDescription = await peerConnection.createAnswer();
   await peerConnection.setLocalDescription(answerDescription);
 
-  const answer = {
-    type: answerDescription.type,
-    sdp: answerDescription.sdp,
-  };
+  await callDoc.update({ answer: { type: answerDescription.type, sdp: answerDescription.sdp } });
 
-  await callDoc.update({ answer });
-
-  offerCandidates.onSnapshot((snapshot) => {
-    snapshot.docChanges().forEach((change) => {
+  offerCandidates.onSnapshot(snapshot => {
+    snapshot.docChanges().forEach(change => {
       if (change.type === 'added') {
-        const candidate = new RTCIceCandidate(change.doc.data());
-        peerConnection.addIceCandidate(candidate);
+        peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
       }
     });
   });
 });
 
-// Utilitário para enviar o ID da chamada no chat
-function enviarCodigoNoChat(callId) {
-  const user = auth.currentUser;
-  if (!user) return;
-
-  db.collection("mensagens").add({
-    userId: user.uid,
-    autor: user.email,
-    avatarUrl: currentAvatarUrl,
-    texto: `📞 Criei uma vídeo chamada! Use este código para entrar: ${callId}`,
-    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-  });
-}
-
-// Botões de Mídia
 toggleMicBtn.addEventListener('click', () => {
   if (localStream) {
-    const audioTrack = localStream.getAudioTracks()[0];
-    if (audioTrack) {
-      audioTrack.enabled = !audioTrack.enabled;
-      toggleMicBtn.textContent = audioTrack.enabled ? "🎤 Mudar Mute" : "🎙️ Ativar Mic";
-    }
+    const track = localStream.getAudioTracks()[0];
+    if (track) track.enabled = !track.enabled;
   }
 });
 
 toggleCamBtn.addEventListener('click', () => {
   if (localStream) {
-    const videoTrack = localStream.getVideoTracks()[0];
-    if (videoTrack) {
-      videoTrack.enabled = !videoTrack.enabled;
-      toggleCamBtn.textContent = videoTrack.enabled ? "📹 Desativar Câmera" : "📷 Ativar Câmera";
-    }
+    const track = localStream.getVideoTracks()[0];
+    if (track) track.enabled = !track.enabled;
   }
 });
 
-// Encerrar Chamada
 endCallBtn.addEventListener('click', () => {
   if (localStream) localStream.getTracks().forEach(t => t.stop());
   if (peerConnection) peerConnection.close();
-
-  localVideo.srcObject = null;
-  remoteVideo.srcObject = null;
   videoModal.style.display = 'none';
 });
