@@ -2,12 +2,13 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meu Chat em Tempo Real</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO) -->
+  <!-- TELA DE AUTENTICAÇÃO -->
   <div id="auth-container" class="chat-container">
     <h2 id="auth-title">🔐 Acesso ao Chat</h2>
     
@@ -22,30 +23,94 @@
     </div>
   </div>
 
-  <!-- CAIXA PRINCIPAL DO CHAT (INICIA OCULTA) -->
+  <!-- CAIXA PRINCIPAL DO CHAT -->
   <div id="chat-container" class="chat-container" style="display: none;">
     <div class="chat-header">
-      <h2>💬 Chat da Turma</h2>
-      <button id="logout-btn" class="btn-logout">Sair</button>
+      <div class="user-profile">
+        <label for="avatar-input" title="Clique para alterar foto de perfil">
+          <img id="user-avatar-img" src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Avatar" class="avatar-header">
+        </label>
+        <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+        
+        <div class="user-info-text">
+          <p id="user-display" class="user-info"></p>
+          <small class="avatar-tip">Clique no ícone para alterar avatar</small>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="video-call-btn" class="btn-icon btn-video" title="Iniciar Vídeo Chamada">📹</button>
+        <button id="logout-btn" class="btn-logout" title="Sair">Sair</button>
+      </div>
     </div>
 
-    <!-- MENSAGENS -->
+    <!-- JANELA DAS MENSAGENS -->
     <div id="chat-box" class="chat-box"></div>
 
+    <!-- PREVIEW DE ARQUIVO SELECIONADO -->
+    <div id="file-preview-area" class="file-preview-area" style="display: none;">
+      <span id="file-name-display"></span>
+      <button id="cancel-file-btn" class="btn-cancel-file">✕</button>
+    </div>
+
+    <!-- EMOJI PICKER POPUP -->
+    <div id="emoji-picker" class="emoji-picker" style="display: none;">
+      <span>😀</span><span>😂</span><span>😍</span><span>👍</span><span>❤️</span>
+      <span>🔥</span><span>🎉</span><span>🚀</span><span>👏</span><span>🙏</span>
+      <span>😊</span><span>😎</span><span>🥳</span><span>💡</span>
+    </div>
+
     <!-- ÁREA DE ENTRADA -->
-    <div class="input-area">
-      <!-- Exibe o usuário autenticado -->
-      <p id="user-display" class="user-info"></p>
-      
+    <div class="input-area chat-controls">
+      <label for="file-input" class="btn-icon" title="Anexar Documento ou Imagem">📎</label>
+      <input type="file" id="file-input" style="display: none;">
+
+      <button id="emoji-btn" class="btn-icon" title="Inserir Emojis">😀</button>
       <input type="text" id="message" placeholder="Digite sua mensagem..." />
       <button id="send-btn">Enviar</button>
     </div>
   </div>
 
-  <!-- SDKs do Firebase (SDK v8 Compatível) -->
+  <!-- MODAL DE VÍDEO CHAMADA WEBRTC -->
+  <div id="video-modal" class="modal-overlay" style="display: none;">
+    <div class="video-modal-content">
+      <h3>📹 Vídeo Chamada P2P</h3>
+      
+      <!-- Telas de Vídeo -->
+      <div class="video-grid">
+        <div class="video-wrapper">
+          <video id="remote-video" autoplay playsinline></video>
+          <span class="video-label">Outra Pessoa</span>
+        </div>
+        <div class="video-wrapper local-wrapper">
+          <video id="local-video" autoplay playsinline muted></video>
+          <span class="video-label">Você</span>
+        </div>
+      </div>
+
+      <!-- Controles de Conexão -->
+      <div class="call-setup-area">
+        <button id="create-call-btn" class="btn-call-action">➕ Criar Chamada</button>
+        <div class="join-box">
+          <input type="text" id="call-id-input" placeholder="Cole o Código da Chamada..." />
+          <button id="join-call-btn" class="btn-call-action">🔗 Entrar na Chamada</button>
+        </div>
+      </div>
+
+      <!-- Controles da Mídia -->
+      <div class="video-controls">
+        <button id="toggle-mic-btn" class="btn-video-control">🎤 Mudar Mute</button>
+        <button id="toggle-cam-btn" class="btn-video-control">📹 Desativar Câmera</button>
+        <button id="end-call-btn" class="btn-video-danger">❌ Encerrar Chamada</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SDKs do Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
  
   <script src="script.js"></script>
 </body>
