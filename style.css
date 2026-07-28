@@ -1,95 +1,123 @@
-/* Zerando margens e definindo fonte limpa */
-* { /* Seleciona todos os elementos HTML da página */
-  box-sizing: border-box; /* Inclui padding e borders no cálculo do tamanho total do elemento */
-  margin: 0; /* Remove as margens internas padrão de todos os elementos */
-  padding: 0; /* Remove os espaçamentos internos padrão de todos os elementos */
-  font-family: Arial, sans-serif; /* Define a família de fontes como Arial ou sans-serif genérica */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
 }
 
-/* Centralizando tudo na tela com fundo suave */
-body { /* Seleciona a tag body */
-  background-color: #f0f2f5; /* Define a cor de fundo da página para um cinza bem claro */
-  display: flex; /* Ativa o layout Flexbox no elemento pai */
-  justify-content: center; /* Centraliza o conteúdo horizontalmente no ecrã */
-  align-items: center; /* Centraliza o conteúdo verticalmente no ecrã */
-  height: 100vh; /* Define a altura do body como 100% da altura da viewport */
+body {
+  background-color: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-/* Container do chat estilizado */
-.chat-container { /* Seleciona o elemento com a classe chat-container */
-  width: 100%; /* Ocupa 100% da largura disponível até o limite definido */
-  max-width: 450px; /* Impede que o chat fique com largura superior a 450 pixels */
-  background: #ffffff; /* Define o fundo da caixa de chat como branco puro */
-  border-radius: 12px; /* Arredonda os cantos da caixa em 12 pixels */
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Aplica uma sombra projetada suave */
-  padding: 20px; /* Adiciona um espaçamento interno de 20 pixels nas bordas */
+.chat-container {
+  width: 100%;
+  max-width: 450px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
 }
 
-/* Título em destaque */
-h2 { /* Seleciona os títulos de nível 2 */
-  text-align: center; /* Alinha o texto do título ao centro */
-  color: #333; /* Define a cor do texto para um cinza escuro */
-  margin-bottom: 15px; /* Adiciona uma margem inferior de 15 pixels */
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
-/* Janela onde as mensagens rolam */
-.chat-box { /* Seleciona a caixa que exibirá as mensagens */
-  height: 300px; /* Define uma altura fixa de 300 pixels */
-  border: 2px solid #e0e0e0; /* Adiciona uma borda sólida cinza claro de 2 pixels */
-  border-radius: 8px; /* Arredonda as quinas da caixa em 8 pixels */
-  overflow-y: auto; /* Ativa a rolagem vertical se o conteúdo ultrapassar a altura */
-  padding: 10px; /* Adiciona um espaçamento interno de 10 pixels */
-  margin-bottom: 15px; /* Adiciona uma margem inferior de 15 pixels */
-  background-color: #fafafa; /* Define um fundo ligeiramente acinzentado */
+h2 {
+  text-align: center;
+  color: #333;
 }
 
-/* Estilo de cada mensagem individual */
-.msg { /* Seleciona cada balão individual de mensagem */
-  background-color: #e1f5fe; /* Define a cor de fundo como um azul bem claro */
-  padding: 8px 12px; /* Define espaçamento interno de 8px (topo/baixo) e 12px (lados) */
-  border-radius: 8px; /* Arredonda os cantos da mensagem em 8 pixels */
-  margin-bottom: 8px; /* Adiciona um espaço de 8 pixels entre cada mensagem */
-  word-wrap: break-word; /* Quebra palavras muito longas para não estourar a caixa */
+.chat-box {
+  height: 300px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  overflow-y: auto;
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: #fafafa;
 }
 
-/* Destaque para o nome de quem enviou */
-.msg-user { /* Seleciona o elemento do nome do usuário dentro da mensagem */
-  font-weight: bold; /* Deixa o texto do nome em negrito */
-  color: #0288d1; /* Define a cor do nome como um tom de azul escuro */
+.msg {
+  background-color: #e1f5fe;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  word-wrap: break-word;
 }
 
-/* Organização dos campos de entrada */
-.input-area { /* Seleciona o container que envolve os inputs e botão */
-  display: flex; /* Ativa o layout Flexbox */
-  flex-direction: column; /* Organiza os elementos internos em uma coluna */
-  gap: 10px; /* Cria um espaçamento automático de 10 pixels entre os elementos */
+.msg-user {
+  font-weight: bold;
+  color: #0288d1;
 }
 
-/* Estilo para as caixas de texto */
-input[type="text"] { /* Seleciona apenas os campos input do tipo texto */
-  padding: 12px; /* Adiciona espaçamento interno de 12 pixels */
-  border: 2px solid #ccc; /* Define uma borda cinza padrão de 2 pixels */
-  border-radius: 6px; /* Arredonda as bordas do campo em 6 pixels */
-  font-size: 14px; /* Define o tamanho da fonte interna do input como 14 pixels */
+.input-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-/* Foco visual claro ao clicar nos campos */
-input[type="text"]:focus { /* Aplica estilos ao clicar/focar no campo de texto */
-  border-color: #0288d1; /* Muda a cor da borda para azul ao focar */
-  outline: none; /* Remove o contorno padrão do navegador */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  padding: 12px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
-/* Botão interativo com feedback visual */
-button { /* Seleciona o elemento de botão */
-  padding: 12px; /* Define o espaçamento interno do botão como 12 pixels */
-  background-color: #0288d1; /* Define o fundo do botão como azul */
-  color: white; /* Define a cor do texto do botão como branca */
-  border: none; /* Remove as bordas padrão do botão */
-  border-radius: 6px; /* Arredonda os cantos em 6 pixels */
-  font-weight: bold; /* Aplica negrito ao texto do botão */
-  cursor: pointer; /* Transforma o ponteiro do mouse no ícone de mãozinha interativa */
+input:focus {
+  border-color: #0288d1;
+  outline: none;
 }
 
-button:hover { /* Aplica estilos quando o ponteiro do mouse passa por cima do botão */
-  background-color: #01579b; /* Escurece o tom de azul do fundo */
+button {
+  padding: 12px;
+  background-color: #0288d1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #01579b;
+}
+
+/* Botões e Utilitários de Autenticação */
+.btn-secondary {
+  background-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-logout {
+  padding: 6px 12px;
+  background-color: #d32f2f;
+  font-size: 12px;
+}
+
+.btn-logout:hover {
+  background-color: #b71c1c;
+}
+
+.user-info {
+  font-size: 13px;
+  color: #555;
+  font-weight: bold;
+}
+
+.error-msg {
+  color: #d32f2f;
+  font-size: 13px;
+  text-align: center;
 }

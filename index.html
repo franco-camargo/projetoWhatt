@@ -1,43 +1,52 @@
-<!DOCTYPE html> <!-- Declara que o documento é um arquivo HTML5 -->
-<html lang="pt-BR"> <!-- Define a linguagem principal da página como Português do Brasil -->
-<head> <!-- Início do cabeçalho da página (contém metadados e links externos) -->
-  <meta charset="UTF-8"> <!-- Define a codificação de caracteres como UTF-8 para aceitar acentos e ç -->
-  <title>Meu Chat em Tempo Real</title> <!-- Define o título que aparece na aba do navegador -->
-  <!-- Conectando nosso arquivo de estilo CSS -->
-  <link rel="stylesheet" href="style.css"> <!-- Importa a folha de estilo CSS externa chamada style.css -->
-</head> <!-- Fim do cabeçalho da página -->
-<body> <!-- Início do corpo do documento (conteúdo visível para o usuário) -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Meu Chat em Tempo Real</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-  <!-- CAIXA PRINCIPAL DO CHAT -->
-  <div class="chat-container"> <!-- Div principal que envolve todos os elementos do chat para centralização e layout -->
-   
-    <!-- CABEÇALHO COM TÍTULO -->
-    <h2>💬 Chat da Turma</h2> <!-- Título secundário do chat com um emoji decorativo -->
+  <!-- TELA DE AUTENTICAÇÃO (LOGIN / CADASTRO) -->
+  <div id="auth-container" class="chat-container">
+    <h2 id="auth-title">🔐 Acesso ao Chat</h2>
+    
+    <div class="input-area">
+      <input type="email" id="auth-email" placeholder="Seu e-mail..." />
+      <input type="password" id="auth-password" placeholder="Sua senha..." />
+      
+      <button id="login-btn">Entrar</button>
+      <button id="register-btn" class="btn-secondary">Cadastrar Nova Conta</button>
+      
+      <p id="auth-error" class="error-msg"></p>
+    </div>
+  </div>
 
-    <!-- ÁREA ONDE AS MENSAGENS VÃO APARECER -->
-    <div id="chat-box" class="chat-box"></div> <!-- Conteiner vazio com ID e classe onde o JS inserirá as mensagens recebidas -->
+  <!-- CAIXA PRINCIPAL DO CHAT (INICIA OCULTA) -->
+  <div id="chat-container" class="chat-container" style="display: none;">
+    <div class="chat-header">
+      <h2>💬 Chat da Turma</h2>
+      <button id="logout-btn" class="btn-logout">Sair</button>
+    </div>
 
-    <!-- ÁREA DE ENTRADA (INPUTS E BOTÃO) -->
-    <div class="input-area"> <!-- Div receptora dos campos de texto e botão -->
-      <!-- Campo para o nome do usuário -->
-      <input type="text" id="username" placeholder="Seu nome..." /> <!-- Campo de texto de linha única para digitar o nome -->
-     
-      <!-- Campo para a mensagem -->
-      <input type="text" id="message" placeholder="Digite sua mensagem..." /> <!-- Campo de texto para digitar o conteúdo da mensagem -->
-     
-      <!-- Botão para enviar -->
-      <button id="send-btn">Enviar</button> <!-- Botão clicável para realizar o envio da mensagem -->
-    </div> <!-- Fim da área de entrada -->
+    <!-- MENSAGENS -->
+    <div id="chat-box" class="chat-box"></div>
 
-  </div> <!-- Fim do container principal do chat -->
+    <!-- ÁREA DE ENTRADA -->
+    <div class="input-area">
+      <!-- Exibe o usuário autenticado -->
+      <p id="user-display" class="user-info"></p>
+      
+      <input type="text" id="message" placeholder="Digite sua mensagem..." />
+      <button id="send-btn">Enviar</button>
+    </div>
+  </div>
 
-  <!-- IMPORTANDO O FIREBASE (VERSÃO V8 COMPATÍVEL VIA CDN) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script> <!-- Carrega o núcleo básico do Firebase SDK -->
+  <!-- SDKs do Firebase (SDK v8 Compatível) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
  
-  <!-- ⚠️ BIBLIOTECA DO FIRESTORE -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script> <!-- Carrega a biblioteca específica do banco Cloud Firestore -->
- 
-  <!-- CONECTANDO NOSSO SCRIPT JAVASCRIPT -->
-  <script src="script.js"></script> <!-- Importa o script JavaScript personalizado com a lógica da aplicação -->
-</body> <!-- Fim do corpo do documento -->
+  <script src="script.js"></script>
+</body>
 </html>
