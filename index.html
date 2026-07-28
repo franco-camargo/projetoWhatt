@@ -1,75 +1,43 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Meu Chat em Tempo Real</title>
-  <!-- Conexão com o CSS separado -->
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<!DOCTYPE html> <!-- Declara que o documento é um arquivo HTML5 -->
+<html lang="pt-BR"> <!-- Define a linguagem principal da página como Português do Brasil -->
+<head> <!-- Início do cabeçalho da página (contém metadados e links externos) -->
+  <meta charset="UTF-8"> <!-- Define a codificação de caracteres como UTF-8 para aceitar acentos e ç -->
+  <title>Meu Chat em Tempo Real</title> <!-- Define o título que aparece na aba do navegador -->
+  <!-- Conectando nosso arquivo de estilo CSS -->
+  <link rel="stylesheet" href="style.css"> <!-- Importa a folha de estilo CSS externa chamada style.css -->
+</head> <!-- Fim do cabeçalho da página -->
+<body> <!-- Início do corpo do documento (conteúdo visível para o usuário) -->
 
-  <div id="chat-container">
-    <h2>💬 Chat da Turma</h2>
-    
-    <div id="mensagens"></div>
+  <!-- CAIXA PRINCIPAL DO CHAT -->
+  <div class="chat-container"> <!-- Div principal que envolve todos os elementos do chat para centralização e layout -->
+   
+    <!-- CABEÇALHO COM TÍTULO -->
+    <h2>💬 Chat da Turma</h2> <!-- Título secundário do chat com um emoji decorativo -->
 
-    <form id="form-mensagem">
-      <input type="text" id="texto-msg" placeholder="Digite sua mensagem..." required autocomplete="off">
-      <button type="submit">Enviar</button>
-    </form>
-  </div>
+    <!-- ÁREA ONDE AS MENSAGENS VÃO APARECER -->
+    <div id="chat-box" class="chat-box"></div> <!-- Conteiner vazio com ID e classe onde o JS inserirá as mensagens recebidas -->
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } 
-      from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+    <!-- ÁREA DE ENTRADA (INPUTS E BOTÃO) -->
+    <div class="input-area"> <!-- Div receptora dos campos de texto e botão -->
+      <!-- Campo para o nome do usuário -->
+      <input type="text" id="username" placeholder="Seu nome..." /> <!-- Campo de texto de linha única para digitar o nome -->
+     
+      <!-- Campo para a mensagem -->
+      <input type="text" id="message" placeholder="Digite sua mensagem..." /> <!-- Campo de texto para digitar o conteúdo da mensagem -->
+     
+      <!-- Botão para enviar -->
+      <button id="send-btn">Enviar</button> <!-- Botão clicável para realizar o envio da mensagem -->
+    </div> <!-- Fim da área de entrada -->
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDqwfO8QmX1KZ4r04m-dLLksUVswLHGyyE",
-      authDomain: "projetowhattfirebase.firebaseapp.com",
-      projectId: "projetowhattfirebase",
-      storageBucket: "projetowhattfirebase.firebasestorage.app",
-      messagingSenderId: "423583007790",
-      appId: "1:423583007790:web:fc80904d1fcda1588b0bbf"
-    };
+  </div> <!-- Fim do container principal do chat -->
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const mensagensRef = collection(db, "mensagens");
-
-    const form = document.getElementById("form-mensagem");
-    const campoTexto = document.getElementById("texto-msg");
-    const caixaMensagens = document.getElementById("mensagens");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      
-      const texto = campoTexto.value;
-      campoTexto.value = "";
-
-      await addDoc(mensagensRef, {
-        texto: texto,
-        horario: serverTimestamp()
-      });
-    });
-
-    const consultaOrdenada = query(mensagensRef, orderBy("horario", "asc"));
-
-    onSnapshot(consultaOrdenada, (snapshot) => {
-      caixaMensagens.innerHTML = "";
-
-      snapshot.forEach((doc) => {
-        const dados = doc.data();
-        if (dados.texto) {
-          const div = document.createElement("div");
-          div.classList.add("msg");
-          div.textContent = dados.texto;
-          caixaMensagens.appendChild(div);
-        }
-      });
-
-      caixaMensagens.scrollTop = caixaMensagens.scrollHeight;
-    });
-  </script>
-</body>
+  <!-- IMPORTANDO O FIREBASE (VERSÃO V8 COMPATÍVEL VIA CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script> <!-- Carrega o núcleo básico do Firebase SDK -->
+ 
+  <!-- ⚠️ BIBLIOTECA DO FIRESTORE -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script> <!-- Carrega a biblioteca específica do banco Cloud Firestore -->
+ 
+  <!-- CONECTANDO NOSSO SCRIPT JAVASCRIPT -->
+  <script src="script.js"></script> <!-- Importa o script JavaScript personalizado com a lógica da aplicação -->
+</body> <!-- Fim do corpo do documento -->
 </html>

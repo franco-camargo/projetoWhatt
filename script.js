@@ -1,62 +1,73 @@
-// 1. Importando o Firebase e o Banco de Dados (Firestore)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } 
-  from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-
-// 2. Suas chaves de conexão
+// 1. CONECTAR COM O FIREBASE
+// Substitua o objeto abaixo com as chaves reais do seu Console do Firebase
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDqwfO8QmX1KZ4r04m-dLLksUVswLHGyyE",
-  authDomain: "projetowhattfirebase.firebaseapp.com",
-  projectId: "projetowhattfirebase",
-  storageBucket: "projetowhattfirebase.firebasestorage.app",
-  messagingSenderId: "423583007790",
-  appId: "1:423583007790:web:fc80904d1fcda1588b0bbf"
+  apiKey: "AIzaSyBfZ_h3rVT_XyUWVErESOUaBU52M_S-JLI",
+  authDomain: "projetofirabasechat.firebaseapp.com",
+  projectId: "projetofirabasechat",
+  storageBucket: "projetofirabasechat.firebasestorage.app",
+  messagingSenderId: "153736799639",
+  appId: "1:153736799639:web:035bbbcf5bd98c08b690d2"
 };
 
-// 3. Ligando o motor do Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const mensagensRef = collection(db, "mensagens");
+// Inicializa o Firebase
+firebase.initializeApp(firebaseConfig);
 
-// Pega os elementos da tela
-const form = document.getElementById("form-mensagem");
-const campoTexto = document.getElementById("texto-msg");
-const caixaMensagens = document.getElementById("mensagens");
+// Conecta ao serviço Cloud Firestore
+const db = firebase.firestore();
 
-// ----------------------------------------------------
-// PASSO A: ENVIAR MENSAGEM PARA O FIREBASE
-// ----------------------------------------------------
-form.addEventListener("submit", async (e) => {
-  e.preventDefault(); // Impede a página de recarregar
-  
-  const texto = campoTexto.value;
-  campoTexto.value = ""; // Limpa o campo digitado
+// 2. SELECIONA OS ELEMENTOS DA TELA
+const campoNome = document.getElementById('username');
+const campoTexto = document.getElementById('message');
+const btnEnviar = document.getElementById('send-btn');
+const caixaMensagens = document.getElementById('chat-box');
 
-  // Salva no banco de dados
-  await addDoc(mensagensRef, {
+// 3. FUNÇÃO PARA ENVIAR MENSAGEM AO FIRESTORE
+function enviarMensagem() {
+  const nome = campoNome.value.trim();
+  const texto = campoTexto.value.trim();
+
+  if (nome === '' || texto === '') {
+    alert('Por favor, preencha o nome e a mensagem!');
+    return;
+  }
+
+  // Grava uma nova mensagem no Firestore com data e hora do servidor
+  db.collection("mensagens").add({
+    autor: nome,
     texto: texto,
-    horario: serverTimestamp() // Hora exata do servidor
-  });
-});
-
-// ----------------------------------------------------
-// PASSO B: ESCUTAR NOVAS MENSAGENS EM TEMPO REAL
-// ----------------------------------------------------
-const consultaOrdenada = query(mensagensRef, orderBy("horario", "asc"));
-
-onSnapshot(consultaOrdenada, (snapshot) => {
-  caixaMensagens.innerHTML = ""; // Limpa a tela para atualizar
-
-  snapshot.forEach((doc) => {
-    const dados = doc.data();
-    if (dados.texto) {
-      const div = document.createElement("div");
-      div.classList.add("msg");
-      div.textContent = dados.texto;
-      caixaMensagens.appendChild(div);
-    }
+    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  // Rola a caixa para a última mensagem automaticamente
-  caixaMensagens.scrollTop = caixaMensagens.scrollHeight;
+  campoTexto.value = '';
+}
+
+// 4. EVENTOS DE DISPARO
+btnEnviar.addEventListener('click', enviarMensagem);
+
+campoTexto.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    enviarMensagem();
+  }
 });
+
+// 5. RECEBER MENSAGENS EM TEMPO REAL NO FIRESTORE
+db.collection("mensagens")
+  .orderBy("criadoEm", "asc")
+  .onSnapshot((snapshot) => {
+    // Limpa o container para renderizar a lista atualizada
+    caixaMensagens.innerHTML = '';
+
+    snapshot.forEach((doc) => {
+      const mensagem = doc.data();
+      if (mensagem.autor && mensagem.texto) {
+        const divMsg = document.createElement('div');
+        divMsg.classList.add('msg');
+        divMsg.innerHTML = `<span class="msg-user">${mensagem.autor}:</span> ${mensagem.texto}`;
+        caixaMensagens.appendChild(divMsg);
+      }
+    });
+
+    // Rola automaticamente para o final da conversa
+    caixaMensagens.scrollTop = caixaMensagens.scrollHeight;
+  });
